@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,11 +17,13 @@ class LeadFactory extends Factory
      */
     public function definition(): array
     {
-         $details = [
+
+
+        $details = [
             'source' => $this->faker->url,
-            'form-name' => $this->faker->sentence(1),
-            'from-page' => $this->faker->url,
-            'from-website' => $this->faker->url,
+            'form_name' => $this->faker->sentence(1),
+            'from_page' =>  $this->faker->url,
+            'from_website' =>  $this->faker->url,
             'user_ip' => $this->faker->ipv4,
             'user_city' => $this->faker->city,
             'user_country' => $this->faker->country,
@@ -39,6 +42,8 @@ class LeadFactory extends Factory
             'details' => $details,
             'is_read' => $this->faker->boolean,
             'is_hidden' => $this->faker->boolean,
+            'created_at' => Carbon::now()->subMinutes(rand(0, 1440)),
+            'updated_at' => Carbon::now()->subMinutes(rand(0, 1440)),
         ];
     }
 }

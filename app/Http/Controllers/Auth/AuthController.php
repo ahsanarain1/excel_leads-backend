@@ -66,7 +66,14 @@ class AuthController extends Controller
 
     public function resend()
     {
+         /** @var \App\Models\User $user **/
+        $user = auth()->user();
+        // Generate a new verification code and store it
+        $verificationCode = $user->generateVerificationCode();
 
+        // Send the verification email with the stored verification code
+        $mail = $user->notify(new SendTwoFactorCode($verificationCode));
+        return response()->json(['success' => true, 'message' =>'Verification Code Sent Again!', 'data'=>$mail], 200);
         // $mail = auth()->user()->sendVerificationEmail();
         // return response()->json(['success' => $mail['success'], 'message' => $mail['message']], 200);
     }

@@ -15,8 +15,10 @@ class LeadController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 2); // Number of items per page, default is 10
-        $leads = Lead::paginate($perPage);
+        $perPage = $request->input('per_page', 10); // Number of items per page, default is 10
+        // $leads = Lead::paginate($perPage);
+        $leads = Lead::orderBy('id', 'desc')->paginate($perPage);
+
         return new LeadCollection($leads);
     }
 
