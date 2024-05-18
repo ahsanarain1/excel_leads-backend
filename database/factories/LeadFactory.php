@@ -18,27 +18,43 @@ class LeadFactory extends Factory
     public function definition(): array
     {
 
-
+        $slug = $this->faker->randomElement(array('ghost-writing-offers', 'book-publishing-offers', 'book-writing-offers'));
+        $ref = $this->faker->randomElement(array('', 'https://www.google.com'));
+        $email = $this->faker->unique()->safeEmail;
+        $phone = $this->faker->phoneNumber;
+        $name = $this->faker->name;
+        $site = 'https://www.excelbookwriting.com';
+        $page = $site . '/' . $slug;
         $details = [
-            'source' => $this->faker->url,
-            'form_name' => $this->faker->sentence(1),
-            'from_page' =>  $this->faker->url,
-            'from_website' =>  $this->faker->url,
-            'user_ip' => $this->faker->ipv4,
-            'user_city' => $this->faker->city,
-            'user_country' => $this->faker->country,
-            'user_region' => $this->faker->country,
+            'formname' => $this->faker->sentence(1),
+            'current_page' =>  $page,
+            'u_ip' => $this->faker->ipv4,
+            'u_city' => $this->faker->city,
+            'u_region' => $this->faker->state,
+            'u_country' => $this->faker->country,
             'nested_array' => [
                 $this->faker->word,
                 $this->faker->numberBetween(1, 100),
                 // Add more key-value pairs as needed
             ],
+            'params' => [
+                'page' => $slug,
+                'params' => [
+                    'gad_source' => "1",
+                    'gclid' => "Cj0KCQjw3ZayBhD",
+                    'keyword' => $slug,
+                ],
+                'sitename' => "excelbookwriting.com",
+            ]
         ];
+        if (!empty($ref)) {
+            $details['referring_page'] = $ref;
+        }
         return [
-            'lead_from' => $this->faker->url,
-            'name' => $this->faker->name,
-            'email' => $this->faker->unique()->safeEmail,
-            'phone' => $this->faker->phoneNumber,
+            'lead_from' => $page,
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
             'details' => $details,
             'is_read' => $this->faker->boolean,
             'is_hidden' => $this->faker->boolean,
