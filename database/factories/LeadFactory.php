@@ -58,8 +58,8 @@ class LeadFactory extends Factory
             'details' => $details,
             'is_read' => $this->faker->boolean,
             'is_hidden' => $this->faker->boolean,
-            'created_at' => Carbon::now()->subMinutes(rand(0, 1440)),
-            'updated_at' => Carbon::now()->subMinutes(rand(0, 1440)),
+            'created_at' =>  $this->faker->dateTimeBetween('-1 year', 'now'),
+
         ];
     }
 }

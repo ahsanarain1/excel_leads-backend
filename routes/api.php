@@ -45,6 +45,7 @@ Route::group(['prefix' => 'v1'], function () {
 
     // Route to fetch all leads if no ID is provided
     Route::get('/leads', [LeadController::class, 'index']);
+    Route::get('/stats', [LeadController::class, 'stats']);
     Route::post('/add_lead', [LeadController::class, 'store']);
 });
 Route::middleware(['2fa'])->get('/asd', function () {

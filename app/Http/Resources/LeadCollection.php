@@ -15,15 +15,21 @@ class LeadCollection extends ResourceCollection
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
-        //  return $this->collection;
+        // return parent::toArray($request);
+        // return $this->collection->toArray();
+        return [
+            'data' => $this->collection->toArray(),
+            'count' => $this->collection->count(),
+        ];
     }
-    public function with($request){
+    public function with($request)
+    {
         return [
             'success' => true
         ];
     }
-    public function withResponse($request,$response){
+    public function withResponse($request, $response)
+    {
         $response->header('Accept', 'application/json');
     }
 }

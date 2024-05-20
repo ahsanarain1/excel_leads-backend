@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Lead extends Model
 {
@@ -19,7 +20,8 @@ class Lead extends Model
     ];
 
 
-    public function id():string{
+    public function id(): string
+    {
         return (string) $this->id;
     }
     /**
@@ -147,5 +149,90 @@ class Lead extends Model
     public static function getAllNotHiddenNotRead()
     {
         return self::notHidden()->notRead()->get();
+    }
+
+
+
+    // Get leads for today
+    public static function leadsToday()
+    {
+        return self::whereDate('created_at', today())->count();
+    }
+
+    // Get leads for this week
+    public static function leadsThisWeek()
+    {
+        return self::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count();
+    }
+
+    // Get leads for this month
+    public static function leadsThisMonth()
+    {
+        return self::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count();
+    }
+
+    // Get leads for this year
+    public static function leadsThisYear()
+    {
+        return self::whereYear('created_at', now()->year)->count();
+    }
+
+    // Get leads per day
+    public static function leadsPerDay()
+    {
+        return self::select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as total'))
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get();
+    }
+
+    // Get leads per week
+    public static function leadsPerWeek()
+    {
+        return self::select(DB::raw('YEARWEEK(created_at, 1) as week'), DB::raw('count(*) as total'))
+            ->groupBy('week')
+            ->orderBy('week', 'asc')
+            ->get();
+    }
+
+    // Get leads per month
+    public static function leadsPerMonth()
+    {
+        return self::select(DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'), DB::raw('count(*) as total'))
+            ->groupBy('month')
+            ->orderBy('month', 'asc')
+            ->get();
+    }
+
+    // Get the month with the highest number of leads
+    public static function monthWithHighestLeads()
+    {
+        return self::select(DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'), DB::raw('count(*) as total'))
+            ->groupBy('month')
+            ->orderBy('total', 'desc')
+            ->first();
+    }
+
+    // Get the month with the lowest number of leads
+    public static function monthWithLowestLeads()
+    {
+        return self::select(DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'), DB::raw('count(*) as total'))
+            ->groupBy('month')
+            ->orderBy('total', 'asc')
+            ->first();
+    }
+
+    public static function avgLeadsPerMonth()
+    {
+        // Calculate the average leads per month using SQL
+        return DB::table('leads')
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as leads_count')
+            ->groupByRaw('YEAR(created_at), MONTH(created_at)')
+            ->orderByRaw('YEAR(created_at) DESC, MONTH(created_at) DESC')
+            ->get()
+            ->groupBy('year')
+            ->map(function ($yearData) {
+                return $yearData->avg('leads_count');
+            });
     }
 }
