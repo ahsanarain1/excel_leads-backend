@@ -28,12 +28,18 @@ class Handler extends ExceptionHandler
         //     //
         // });
         $this->renderable(function (NotFoundHttpException $e, $request) {
-            if($request->is('api/*')){
+            if ($request->is('api/*')) {
                 return response()->json([
                     'success' => false,
-                    'message'=> 'Resource Not Found'
+                    'message' => 'Resource Not Found'
                 ]);
             }
         });
+    }
+
+    protected function unauthenticated($request, \Illuminate\Auth\AuthenticationException $exception)
+    {
+        // return response()->json(['message' => $exception->getMessage()], 401);
+        return response()->json(['message' => 'Unauthenticated.'], 401);
     }
 }

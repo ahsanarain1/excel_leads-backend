@@ -20,18 +20,20 @@ use App\Http\Controllers\API\V1\UserController;
 // Route::middleware(['auth:sanctum', 'allow.unverified.users'])->get('/user', function (Request $request) {
 //     return $request->user();
 // });
-Route::get('/ip', function (\Illuminate\Http\Request $request) {
-    // Get the client's IP address from the request
-    $ipAddress = $request->ip();
+Route::group(
+    ['prefix' => 'v1'],
+    function () {
+        Route::get('/users', [UserController::class, 'index']);
+        Route::get('/user', [UserController::class, 'getUser']);
+    }
+);
 
-    // Return the IP address as JSON response
-    return response()->json(['ip' => $ipAddress]);
-});
 Route::middleware(['auth:sanctum', '2fa'])
     ->get(
         '/user',
         [UserController::class, 'getUser']
     );
+
 Route::group(
     ['prefix' => 'v1', 'middleware' => 'auth:sanctum'],
     function () {
@@ -40,7 +42,7 @@ Route::group(
         // Route::get('/leads/{lead}', [LeadController::class, 'show']);
     }
 );
-Route::group(['prefix' => 'v1'], function () {
+Route::group(['prefix' => 'v1', 'middleware' => 'auth:sanctum'], function () {
     Route::get('/leads/{id}', [LeadController::class, 'show']);
 
     // Route to fetch all leads if no ID is provided

@@ -2,9 +2,11 @@
 
 namespace App\Http\Resources;
 
+use App\Helpers\TimeHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
+
 
 
 class LeadResource extends JsonResource
@@ -28,18 +30,20 @@ class LeadResource extends JsonResource
             'details' => $this->details,
             'is_read' => $this->is_read,
             'is_hidden' => $this->is_hidden,
-            'created_at_date' => Carbon::parse($this->created_at)->tz('PKT')->format('d-m-Y'),
-            'created_at_time' => Carbon::parse($this->created_at)->tz('PKT')->format('h:i:s A e'),
+            'created_at' => TimeHelper::karachiTime($this->created_at),
+
             // 'updated_at' => Carbon::parse($this->updated_at)->format('d-m-Y h:i:s A'),
             // 'self' => route('leads.show',$this->id()),
         ];
     }
-    public function with($request){
+    public function with($request)
+    {
         return [
             'success' => true
         ];
     }
-    public function withResponse($request,$response){
+    public function withResponse($request, $response)
+    {
         $response->header('Accept', 'application/json');
     }
 }

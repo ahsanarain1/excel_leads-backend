@@ -23,7 +23,7 @@ class LeadController extends Controller
             ->orderBy('id', 'desc')
             ->get();
         $lead = new LeadResource(Lead::findOrFail(1));
-        event(new LeadCreated($lead));
+        // event(new LeadCreated($lead));
         return new LeadCollection($leads);
     }
 
