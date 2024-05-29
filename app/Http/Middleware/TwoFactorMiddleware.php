@@ -13,48 +13,19 @@ class TwoFactorMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    // public function handle(Request $request, Closure $next): Response
-    // {
-    //      $user = auth()->user();
-    //     if (auth()->check() && $user->two_factor_code) {
-    //         if ($user->two_factor_expires_at < now()) {
-    //             $user->resetTwoFactorCode();
-    //             auth()->logout();
-    //             return redirect()->route('login')
-    //                 ->withStatus('Your verification code expired. Please re-login.');
-    //         }
-    //         if (!$request->is('verify*')) {
-    //             return redirect()->route('verify.index');
-    //         }
-    //     }
-    //     return $next($request);
-    // }
     public function handle(Request $request, Closure $next): Response
     {
-        // $user = auth()->user();
-        // if (auth()->check() && $user->two_factor_code) {
-        //     if ($user->two_factor_expires_at < now()) {
-        //         $user->resetTwoFactorCode();
-        //         auth()->logout();
-        //         return redirect()->route('login')
-        //             ->withStatus('Your verification code expired. Please re-login.');
-        //     }
-        //     if (!$request->is('verify*')) {
-        //         return redirect()->route('verify.index');
-        //     }
-        // }
-         $user = auth()->user();
-
-        if (auth()->check() && $user->verification_code) {
-            if ($user->verification_code_expires_at < now()) {
+        /** @var \App\Models\User $user **/
+        $user = auth()->user();
+        if (auth()->check() && $user->two_factor_code) {
+            if ($user->two_factor_expires_at < now()) {
                 $user->resetTwoFactorCode();
                 auth()->logout();
-
-                return response()->json(['error' => 'Your verification code expired. Please re-login.'], 401);
+                return response()->json(['message' => 'Your verification code expired. Please re-login.'], 401);
             }
-
-            if (!$request->is('api/v1/verify*')) {
-                return response()->json(['error' => 'Two-factor authentication required.'], 403);
+            if (!$request->is('verify*')) {
+                return
+                    response()->json(['message' => 'Verification code required'], 401);
             }
         }
         return $next($request);

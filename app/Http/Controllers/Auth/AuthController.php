@@ -7,11 +7,13 @@ use App\Events\UserLoggedIn;
 use Illuminate\Http\Request;
 use App\Events\UserLoginAttempt;
 use App\Models\VerificationCode;
+use Illuminate\Http\JsonResponse;
 use App\Events\FailedLoginAttempt;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Notifications\SendTwoFactorCode;
+use Illuminate\Validation\ValidationException;
 
 
 class AuthController extends Controller
@@ -26,57 +28,61 @@ class AuthController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'code' => 'required|integer',
+            'two_factor_code' => 'required|integer',
         ]);
 
-        // Find the verification code
-        $verificationCode = VerificationCode::where('user_id', auth()->user()->id)
-            ->where('code', $request->code)
-            ->first();
-
-        if (!is_null($verificationCode)) {
-            if ($verificationCode->expires_at >= now()) {
-                // Mark the verification code as used
-                $verificationCode->timestamps = false;
-
-                // Mark the verification code as used
-                $verificationCode->used_at = now(); // Update the used_at field
-                $verificationCode->save();
-
-                // Set the user_2fa session
-                session(['user_2fa' => auth()->user()->id]);
-
-                return response()->json(['success' => true, 'message' => 'Login Successful!'], 200);
-            } else {
-                // Prepare error response for expired code
-                $errors = ['code' => ['Verification code expired']];
-                return response()->json(['success' => false, 'message' => 'Verification code expired', 'errors' => $errors], 422);
-            }
-        } else {
-            // Prepare error response for invalid code
-            $errors = ['code' => ['Invalid Code']];
-            return response()->json(['success' => false, 'message' => 'Invalid Code', 'errors' => $errors], 422);
-        }
-    }
-
-
-    public function resend()
-    {
-         /** @var \App\Models\User $user **/
+        /** @var \App\Models\User $user **/
         $user = auth()->user();
-        // Generate a new verification code and store it
-        $verificationCode = $user->generateVerificationCode();
-
-        // Send the verification email with the stored verification code
-        $mail = $user->notify(new SendTwoFactorCode($verificationCode));
-        return response()->json(['success' => true, 'message' =>'Verification Code Sent Again!', 'data'=>$mail], 200);
-        // $mail = auth()->user()->sendVerificationEmail();
-        // return response()->json(['success' => $mail['success'], 'message' => $mail['message']], 200);
+        if ($request->input('two_factor_code') !== $user->two_factor_code) {
+            throw ValidationException::withMessages([
+                'two_factor_code' => __('The code you entered doesn\'t match our records'),
+                'asd' => $user->two_factor_code
+            ]);
+            // $errors = ['code' => ['The code you entered doesn\'t match our records']];
+            // return response()->json(['success' => false, 'message' => 'The code you entered doesn\'t match our records', 'errors' => $errors], 422);
+        }
+        $user->resetTwoFactorCode();
+        return response()->json(['success' => true, 'message' => 'Login Successful!'], 200);
     }
+
+    /**
+     * Resend the two-factor authentication code.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function resend(): JsonResponse
+    {
+
+        /** @var \App\Models\User $user **/
+        $user = auth()->user();
+        $user->generateTwoFactorCode();
+        $user->notify(new SendTwoFactorCode());
+        return
+            response()->json([
+                'success' => true,
+                'message' => 'A new two-factor authentication code has been sent.',
+            ], 200);
+    }
+    // public function resend()
+    // {
+    //     /** @var \App\Models\User $user **/
+    //     $user = auth()->user();
+    //     // Generate a new verification code and store it
+    //     $verificationCode = $user->generateVerificationCode();
+
+    //     // Send the verification email with the stored verification code
+    //     $mail = $user->notify(new SendTwoFactorCode($verificationCode));
+    //     return response()->json(['success' => true, 'message' => 'Verification Code Sent Again!', 'data' => $mail], 200);
+    //     // $mail = auth()->user()->sendVerificationEmail();
+    //     // return response()->json(['success' => $mail['success'], 'message' => $mail['message']], 200);
+    // }
 
     public function signIn(LoginRequest $request)
     {
@@ -102,9 +108,9 @@ class AuthController extends Controller
 
         /** @var \App\Models\User $user **/
         $user = auth()->user();
+        $user->generateTwoFactorCode();
+        $user->notify(new SendTwoFactorCode());
         event(new UserLoginAttempt($user));
-        // Dispatch the UserLoginAttempt event with the email address and success indication
-        // event(new UserLoginAttempt($credentials['email'], true));
 
         return response()->json(['success' => true, 'message' => 'Verification Code Sent'], 200);
     }

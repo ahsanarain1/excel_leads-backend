@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\API\V1;
 
-use App\Events\LeadCreated;
-use App\Http\Controllers\Controller;
 use App\Models\Lead;
+use App\Events\LeadCopied;
+use App\Events\LeadCreated;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Http\Resources\LeadResource;
 use App\Http\Resources\LeadCollection;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LeadController extends Controller
 {
@@ -80,6 +82,32 @@ class LeadController extends Controller
         $lead->hideLead();
 
         return response()->json(['message' => 'Lead deleted successfully']);
+    }
+
+
+    /**
+     * Mark the specified lead as hidden.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function setLeadAsRead($id)
+    {
+        $lead = Lead::find($id);
+
+        if (!$lead) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lead not found.',
+            ], 404);
+        }
+
+        $lead->markAsRead();
+        event(new LeadCopied(Auth::user(), $lead));
+        return response()->json([
+            'success' => true,
+            'message' => 'Lead marked as read successfully.',
+        ]);
     }
 
     public function stats()

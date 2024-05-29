@@ -16,7 +16,8 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10); // Number of items per page, default is 10
-        $users = User::paginate($perPage);
+        // $users = User::paginate($perPage);
+        $users = User::all();
         return new UserCollection($users);
     }
 

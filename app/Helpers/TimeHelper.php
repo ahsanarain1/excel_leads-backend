@@ -6,6 +6,7 @@ use Carbon\Carbon;
 
 class TimeHelper
 {
+    private static  $format = 'd/M/y h:i A T';
     /**
      * Convert time to Karachi Time (PKT) and format it.
      *
@@ -13,9 +14,10 @@ class TimeHelper
      * @param string|null $format
      * @return string
      */
-    public static function karachiTime($time, $format = null)
+    public static function karachiTime($time)
     {
-        return self::formatTime($time, 'Asia/Karachi', $format);
+
+        return self::formatTime($time, 'Asia/Karachi');
     }
 
     /**
@@ -25,9 +27,10 @@ class TimeHelper
      * @param string|null $format
      * @return string
      */
-    public static function chicagoTime($time, $format = null)
+    public static function chicagoTime($time)
     {
-        return self::formatTime($time, 'America/Chicago', $format);
+
+        return self::formatTime($time, 'America/Chicago');
     }
 
     /**
@@ -38,11 +41,8 @@ class TimeHelper
      * @param string|null $format
      * @return string
      */
-    public static function formatTime($time, $timezone = 'UTC', $format = null)
+    public static function formatTime($time, $timezone = 'UTC')
     {
-        // Use the default format if $format is not provided
-        $format = $format ?: 'd-m-Y h:i:s A';
-
         // Convert time to Carbon instance
         $carbonTime = Carbon::parse($time);
 
@@ -50,6 +50,6 @@ class TimeHelper
         $carbonTime->setTimezone($timezone);
 
         // Format the time according to the specified format
-        return $carbonTime->format($format);
+        return $carbonTime->format(self::$format);
     }
 }
