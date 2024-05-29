@@ -39,7 +39,7 @@ class LeadFactory extends Factory
             ],
             'params' => [
                 'page' => $slug,
-                'params' => [
+                'google' => [
                     'gad_source' => "1",
                     'gclid' => "Cj0KCQjw3ZayBhD",
                     'keyword' => $slug,
@@ -58,7 +58,7 @@ class LeadFactory extends Factory
             'details' => $details,
             'is_read' => $this->faker->boolean,
             'is_hidden' => $this->faker->boolean,
-            'created_at' =>  $this->faker->dateTimeBetween('-1 year', 'now'),
+            'created_at' =>  $this->faker->dateTimeBetween('-3 month', 'now'),
 
         ];
     }

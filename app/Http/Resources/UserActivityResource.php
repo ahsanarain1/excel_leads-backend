@@ -19,10 +19,6 @@ class UserActivityResource extends JsonResource
         if ($this->lead_id) {
             $leadDetails = [
                 'lead_from' => $this->lead->lead_from,
-                'name' => $this->lead->name,
-                'email' => $this->lead->email,
-                'created_at_pkt' => TimeHelper::karachiTime($this->created_at),
-                'created_at_chicago' => TimeHelper::chicagoTime($this->created_at),
             ];
         }
 

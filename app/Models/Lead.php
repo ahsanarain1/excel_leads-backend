@@ -70,33 +70,23 @@ class Lead extends Model
     /**
      * Mark a lead as read.
      *
-     * @param int $leadId
      * @return bool
      */
-    public static function markAsRead($leadId)
+    public function markAsRead()
     {
-        $lead = self::find($leadId);
-        if ($lead) {
-            $lead->is_read = true;
-            return $lead->save();
-        }
-        return false;
+        $this->is_read = true;
+        return $this->save();
     }
 
     /**
-     * Hide a lead.
+     * Mark the lead as hidden.
      *
-     * @param int $leadId
      * @return bool
      */
-    public static function hideLead($leadId)
+    public function markAsHidden()
     {
-        $lead = self::find($leadId);
-        if ($lead) {
-            $lead->is_hidden = true;
-            return $lead->save();
-        }
-        return false;
+        $this->is_hidden = true;
+        return $this->save();
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Events\UserLoggedIn;
 use App\Events\UserRegistered;
 use App\Events\UserLoginAttempt;
 use App\Events\FailedLoginAttempt;
+use App\Events\LeadCopied;
 use App\Listeners\ListenUserLoggedIn;
 use Illuminate\Support\Facades\Event;
 
@@ -13,6 +14,7 @@ use Illuminate\Auth\Events\Registered;
 use App\Listeners\ListenUserRegistered;
 use App\Listeners\LogFailedLoginAttempt;
 use App\Listeners\ListenUserLoginAttempt;
+use App\Listeners\LogLeadCopy;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
@@ -36,9 +38,9 @@ class EventServiceProvider extends ServiceProvider
         FailedLoginAttempt::class => [
             LogFailedLoginAttempt::class,
         ],
-        // Registered::class => [
-        //     SendEmailVerificationNotification::class,
-        // ],
+        LeadCopied::class => [
+            LogLeadCopy::class,
+        ],
     ];
 
     /**
