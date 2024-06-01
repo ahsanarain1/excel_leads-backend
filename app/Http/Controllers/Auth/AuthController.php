@@ -48,6 +48,7 @@ class AuthController extends Controller
             // return response()->json(['success' => false, 'message' => 'The code you entered doesn\'t match our records', 'errors' => $errors], 422);
         }
         $user->resetTwoFactorCode();
+        event(new UserLoggedIn($user));
         return response()->json(['success' => true, 'message' => 'Login Successful!'], 200);
     }
 
