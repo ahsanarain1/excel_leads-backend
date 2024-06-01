@@ -15,19 +15,24 @@ class TwoFactorMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+
+
         /** @var \App\Models\User $user **/
         $user = auth()->user();
         if (auth()->check() && $user->two_factor_code) {
             if ($user->two_factor_expires_at < now()) {
+
+                auth('web')->logout();
+                $request->session()->invalidate();
                 $user->resetTwoFactorCode();
-                auth()->logout();
-                return response()->json(['message' => 'Your verification code expired. Please re-login.'], 401);
+                return response()->json(['message' => 'Your verification code expired. Please re-login.', 'code' => 'expired'], 401);
             }
-            if (!$request->is('verify*')) {
+            if (!$request->is('api/v1/verify*')) {
                 return
-                    response()->json(['message' => 'Verification code required'], 401);
+                    response()->json(['message' => 'Verification code required', 'code' => 'required'], 401);
             }
         }
+
         return $next($request);
     }
 }

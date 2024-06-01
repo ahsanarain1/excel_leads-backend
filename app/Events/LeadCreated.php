@@ -30,6 +30,9 @@ class LeadCreated implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
+        // if (!auth()->check()) {
+        //     return []; // Don't broadcast if user is not authenticated
+        // }
         return [
             new Channel('leads'),
         ];

@@ -10,7 +10,7 @@ class Lead extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'name', 'email', 'phone', 'details', 'is_read', 'is_hidden',
+        'lead_from', 'name', 'email', 'phone', 'details', 'is_read', 'is_hidden',
     ];
 
     protected $casts = [

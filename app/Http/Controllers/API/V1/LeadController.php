@@ -25,7 +25,7 @@ class LeadController extends Controller
             ->orderBy('id', 'desc')
             ->get();
         $lead = new LeadResource(Lead::findOrFail(1));
-        event(new LeadCreated($lead));
+
         return new LeadCollection($leads);
     }
 
@@ -35,15 +35,17 @@ class LeadController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'name' => 'nullable|string',
-            'email' => 'nullable|email',
+            'lead_from' => 'required|string',
+            'name' => 'required|string',
+            'email' => 'required|email',
             'phone' => 'nullable|string',
             'details' => 'nullable|array',
         ]);
 
         $lead = Lead::create($validatedData);
-
-        return new LeadResource($lead);
+        $lead = new LeadResource($lead);
+        event(new LeadCreated($lead));
+        return $lead;
     }
 
     /**
@@ -76,12 +78,19 @@ class LeadController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Lead $id)
+    public function destroy($id)
     {
         $lead = Lead::findOrFail($id);
-        $lead->hideLead();
-
+        $lead->delete();
         return response()->json(['message' => 'Lead deleted successfully']);
+        // $lead = Lead::findOrFail($id);
+
+        // if ($lead->exists) {
+        //     $lead->delete();
+        //     return response()->json(['message' => 'Lead deleted successfully']);
+        // } else {
+        //     return response()->json(['message' => 'Lead not found'], 404);
+        // }
     }
 
 
