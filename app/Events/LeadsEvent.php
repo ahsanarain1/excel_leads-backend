@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Enum\ActivityType;
 use App\Models\Lead;
 use App\Enum\OperationsEnum;
 use Illuminate\Broadcasting\Channel;
@@ -39,17 +40,23 @@ class LeadsEvent
      */
     public function broadcastOn(): array
     {
-        // Check if the action is 'OperationsEnum::STORE' before broadcasting
-        if ($this->action === OperationsEnum::STORE) {
-            return new Channel('leads');
-        }
-        return [];
+        // Only broadcast for specific activity types
+        $broadcastableActions = [
+            ActivityType::LEAD_DELETE,
+            ActivityType::LEAD_COPY,
+        ];
+
+        return in_array($this->action, $broadcastableActions, true)
+            ? [new Channel('leads')]
+            : [];
     }
-    public function broadcastAs()
+
+    public function broadcastAs(): string
     {
-        if ($this->action === OperationsEnum::STORE) {
-            return 'lead-' . OperationsEnum::STORE;
-        }
-        return '';
+        return match ($this->action) {
+            ActivityType::LEAD_DELETE => 'lead-' . OperationsEnum::DELETE,
+            ActivityType::LEAD_COPY => 'lead-' . OperationsEnum::COPY,
+            default => '',
+        };
     }
 }

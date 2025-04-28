@@ -13,12 +13,15 @@ return new class extends Migration
     {
         Schema::create('user_activities', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Reference to users table
             $table->string('ip_address')->nullable();
-            /** ENUM */
+
+            // ENUM-like string for activity type
             $table->string('activity_type')->nullable();
-            /** end ENUM */
-            $table->foreignId('lead_id')->nullable()->constrained()->onDelete('cascade');
+
+            // Reference to leads table
+            $table->foreignId('lead_id')->nullable()->constrained('leads')->onDelete('cascade');
+
             $table->timestamps();
         });
     }

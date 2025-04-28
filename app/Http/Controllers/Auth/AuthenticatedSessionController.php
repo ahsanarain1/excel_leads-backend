@@ -19,16 +19,17 @@ class AuthenticatedSessionController extends Controller
 
         $request->authenticate();
         $request->session()->regenerate();
-
+        /** @var \App\Models\User $user **/
         $user = auth()->user();
         // $code = $request->user()->generateTwoFactorCode();
         // $request->user()->notify(new SendTwoFactorCode());
-        return response(['success' => true,
-            'data' =>[
+        return response([
+            'success' => true,
+            'data' => [
                 'token' => $user->createToken($user->name)->plainTextToken,
                 'name' => $user->name,
             ],
-            'message'=> 'User logged in!'
+            'message' => 'User logged in!'
         ]);
 
         // return response()->noContent();

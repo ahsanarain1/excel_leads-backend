@@ -2,15 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\User;
+
 use App\Events\UserLoggedIn;
 use Illuminate\Http\Request;
-use App\Events\UserLoginAttempt;
-use App\Models\VerificationCode;
 use Illuminate\Http\JsonResponse;
 use App\Events\FailedLoginAttempt;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Notifications\SendTwoFactorCode;
 use Illuminate\Validation\ValidationException;
@@ -42,7 +39,6 @@ class AuthController extends Controller
         if ($request->input('two_factor_code') !== $user->two_factor_code) {
             throw ValidationException::withMessages([
                 'two_factor_code' => __('The code you entered doesn\'t match our records'),
-                'asd' => $user->two_factor_code
             ]);
             // $errors = ['code' => ['The code you entered doesn\'t match our records']];
             // return response()->json(['success' => false, 'message' => 'The code you entered doesn\'t match our records', 'errors' => $errors], 422);
@@ -95,7 +91,9 @@ class AuthController extends Controller
 
         // Attempt to authenticate the user
         if (!auth()->attempt($credentials)) {
-            event(new FailedLoginAttempt($credentials['email'], $request->ip()));
+            $email = $request->input('email');
+            $user = \App\Models\User::where('email', $email)->first();
+            event(new FailedLoginAttempt($user, $request->ip()));
             return response()->json([
                 'message' => 'These credentials do not match our records.',
                 'errors' => [
@@ -111,8 +109,8 @@ class AuthController extends Controller
         $user = auth()->user();
         $user->generateTwoFactorCode();
         $user->notify(new SendTwoFactorCode());
-        event(new UserLoginAttempt($user));
 
-        return response()->json(['success' => true, 'message' => 'Verification Code Sent'], 200);
+
+        return response()->json(['success' => true, 'message' => 'Verification Code Sent', 'email' => $user->email], 200);
     }
 }

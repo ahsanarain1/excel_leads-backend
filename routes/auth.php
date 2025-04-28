@@ -16,9 +16,16 @@ Route::post('/register', [RegisteredUserController::class, 'store'])
 // Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 //                 ->middleware('guest')
 //                 ->name('login');
-Route::post('/login', [AuthController::class, 'signIn'])
-    ->middleware('guest')
-    ->name('login');
+Route::middleware(['ip.whitelist'])->group(
+    function () {
+        Route::post('/login', [AuthController::class, 'signIn'])
+            ->middleware('guest')
+            ->name('login');
+    }
+);
+// Route::post('/login', [AuthController::class, 'signIn'])
+//     ->middleware('guest')
+//     ->name('login');
 Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
     ->middleware('guest')
     ->name('password.email');

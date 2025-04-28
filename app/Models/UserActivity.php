@@ -42,4 +42,17 @@ class UserActivity extends Model
     {
         return $query->where('user_id', $userId);
     }
+
+    /**
+     * Utility method to log user activity.
+     */
+    public static function logActivity($userId, $type, $leadId = null, $ipAddress = null)
+    {
+        return self::create([
+            'user_id' => $userId,
+            'ip_address' => $ipAddress,
+            'activity_type' => $type,
+            'lead_id' => $leadId,
+        ]);
+    }
 }

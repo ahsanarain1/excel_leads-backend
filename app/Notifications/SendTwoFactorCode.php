@@ -30,6 +30,7 @@ class SendTwoFactorCode extends BaseNotification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
+            ->subject('Authentication Code!')
             ->line("Your two-factor code is {$notifiable->two_factor_code}")
             // ->action('Verify Here', 'asd')
             ->line('The code will expire in 5 minutes')

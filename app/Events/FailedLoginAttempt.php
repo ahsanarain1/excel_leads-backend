@@ -15,6 +15,7 @@ class FailedLoginAttempt
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $email;
+    public $user;
     public $ipAddress;
 
     /**
@@ -23,9 +24,10 @@ class FailedLoginAttempt
      * @param string $email
      * @param string $ipAddress
      */
-    public function __construct($email, $ipAddress)
+    public function __construct($user, $ipAddress)
     {
-        $this->email = $email;
+        // $this->email = $email;
+        $this->user = $user;
         $this->ipAddress = $ipAddress;
     }
 
@@ -37,7 +39,7 @@ class FailedLoginAttempt
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel-name'),
+            // new PrivateChannel('channel-name'),
         ];
     }
 }

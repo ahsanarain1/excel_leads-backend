@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\UserCollection;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -26,7 +27,27 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|in:admin,seller', // Ensure valid role selection
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        // Assign role
+        $user->assignRole($request->role);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Agent registered successfully!',
+            'user' => new UserResource($user)
+        ], 201);
     }
 
     /**
@@ -48,13 +69,33 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy($id)
     {
-        //
+        $user = User::findOrFail($id);
+
+        $user->delete();
+
+        return response()->json(['success'=> true,'message' => 'User deleted successfully']);
     }
     public function getUser(Request $request)
     {
         $user = $request->user();
         return new UserResource($user);
+    }
+
+    /**
+     * Get all sellers.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getSellers()
+    {
+        // Retrieve users with the 'seller' role
+        $sellers = User::role('seller')->get();
+        $collection = new UserCollection($sellers);
+        return response()->json([
+            'success' => true,
+            'data' => $collection
+        ]);
     }
 }

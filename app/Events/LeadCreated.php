@@ -2,15 +2,18 @@
 
 namespace App\Events;
 
+use App\Enum\OperationsEnum;
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Support\Facades\Log;
 
-class LeadCreated implements ShouldBroadcast
+class LeadCreated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -30,15 +33,13 @@ class LeadCreated implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        // if (!auth()->check()) {
-        //     return []; // Don't broadcast if user is not authenticated
-        // }
+
         return [
             new Channel('leads'),
         ];
     }
     public function broadcastAs()
     {
-        return 'lead-created';
+        return 'lead-' . OperationsEnum::STORE;
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Campaign;
+use App\Models\Location;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -15,7 +17,21 @@ class LeadFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
+    public function definition()
+    {
+        $campaign = Campaign::inRandomOrder()->first(); // or you can use `where('domain', 'excel.com')` for specific campaigns
+        return [
+            'campaign_id' => $campaign->id, // References the Campaign factory
+            'assigned_to' => null, // Can be set later or you can add a user factory if needed
+            'name' => $this->faker->name(),
+            'email' => $this->faker->safeEmail(),
+            'phone' => $this->faker->phoneNumber(),
+            'description' => $this->faker->text(),
+            'is_read' => $this->faker->boolean(),
+            'is_hidden' => $this->faker->boolean(),
+        ];
+    }
+    public function desfinition(): array
     {
 
         $slug = $this->faker->randomElement(array('ghost-writing-offers', 'book-publishing-offers', 'book-writing-offers'));
@@ -26,8 +42,11 @@ class LeadFactory extends Factory
         $site = 'https://www.excelbookwriting.com';
         $page = $site . '/' . $slug;
         $details = [
+            'lead_from' => $page,
             'formname' => $this->faker->sentence(1),
-            'current_page' =>  $page,
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
             'u_ip' => $this->faker->ipv4,
             'u_city' => $this->faker->city,
             'u_region' => $this->faker->state,
@@ -58,7 +77,7 @@ class LeadFactory extends Factory
             'details' => $details,
             'is_read' => $this->faker->boolean,
             'is_hidden' => $this->faker->boolean,
-            'created_at' =>  $this->faker->dateTimeBetween('-3 month', 'now'),
+            'created_at' =>  $this->faker->dateTimeBetween('-12 month', 'now'),
 
         ];
     }

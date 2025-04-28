@@ -18,10 +18,9 @@ class RolesAndPermissionsSeeder extends Seeder
         // Create permissions
         $permissions = [
             PermissionEnum::VIEW_LEADS,
-            PermissionEnum::COPY_LEADS,
             PermissionEnum::DELETE_LEADS,
-            PermissionEnum::EDIT_LEADS,
             PermissionEnum::REGISTER_USER,
+            PermissionEnum::VIEW_STATS,
         ];
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
@@ -30,9 +29,12 @@ class RolesAndPermissionsSeeder extends Seeder
         // Create roles and assign created permissions
         $sellerRole = Role::firstOrCreate(['name' => 'seller']);
         $sellerRole->syncPermissions([
-            PermissionEnum::EDIT_LEADS,
+            PermissionEnum::VIEW_LEADS,
+        ]);
+        $managerRole = Role::firstOrCreate(['name' => 'manager']);
+        $managerRole->syncPermissions([
+            PermissionEnum::VIEW_LEADS,
             PermissionEnum::DELETE_LEADS,
-            PermissionEnum::COPY_LEADS,
         ]);
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $adminRole->syncPermissions(Permission::all());

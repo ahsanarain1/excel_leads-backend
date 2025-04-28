@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\API\V1\IpWhitelistController;
+use App\Mail\TestMail;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,3 +27,17 @@ Route::get('/dashboard', function () {
 //     return view('dashboard');
 // })->middleware([ 'twofactor'])->name('dashboard');
 require __DIR__ . '/auth.php';
+
+Route::get('/send-test-email', function () {
+    Mail::to('dev.exceldigitalgroup@gmail.com')->send(new TestMail());
+    return 'Test email sent!';
+});
+Route::get('/my-ip', function (Request $request) {
+    $ip = $request->ip(); // Get the client's IP
+
+    return $ip; // Return IP in response
+});
+
+
+
+Route::middleware('ip.whitelist')->get('/ips', [IpWhitelistController::class, 'index']);

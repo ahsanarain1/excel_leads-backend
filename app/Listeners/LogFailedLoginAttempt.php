@@ -2,8 +2,7 @@
 
 namespace App\Listeners;
 
-
-
+use App\Enum\ActivityType;
 use App\Events\FailedLoginAttempt;
 use App\Models\FailedLoginAttempt as FailedLoginAttemptModel;
 use Illuminate\Queue\InteractsWithQueue;
@@ -28,10 +27,14 @@ class LogFailedLoginAttempt
     public function handle(FailedLoginAttempt $event): void
     {
         // Log the failed login attempt in the database
-        FailedLoginAttemptModel::create([
-            'email' => $event->email,
-            'ip_address' => $event->ipAddress,
-            'attempted_at' => now(),
-        ]);
+        // FailedLoginAttemptModel::create([
+        //     'email' => $event->email,
+        //     'ip_address' => $event->ipAddress,
+        //     'attempted_at' => now(),
+        // ]);
+        /** @var \App\Models\User $user **/
+        $user = $event->user;
+        // Log the user login activity
+        $user->logActivity(request()->ip(), ActivityType::LOGINFAILED);
     }
 }
