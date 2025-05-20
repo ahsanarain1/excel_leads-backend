@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\API\V1;
 
+use App\Helpers\TimeHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserActivityCollection;
 use App\Http\Resources\UserActivityResource;
 use App\Models\Lead;
+use App\Models\User;
 use App\Models\UserActivity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -271,5 +273,113 @@ class StatsController extends Controller
         $activities = UserActivity::orderBy('id', 'desc')
             ->get();
         return UserActivityResource::collection($activities);
+    }
+    public function getDashboardStats(Request $request)
+    {
+        $now = Carbon::now();
+
+        // Total leads (including trashed)
+        $leadsCreated = Lead::count();
+
+        // Failed login attempts with details
+        $failedLoginsQuery = UserActivity::where('activity_type', 'login_failed');
+        $failedLogins = [
+            'count' => $failedLoginsQuery->count(),
+            'data' => $failedLoginsQuery->latest()->get(), // Or paginate if too large
+        ];
+
+        // Leads trend (last 31 days)
+        $leadsTrend = [];
+        for ($i = 30; $i >= 0; $i--) {
+            $date = $now->copy()->subDays($i)->toDateString();
+            $count = Lead::whereDate('created_at', $date)->count();
+            $leadsTrend[] = [
+                'date' => $date,
+                'count' => $count,
+            ];
+        }
+
+        // Monthly leads (current year only)
+        $monthlyLeads = Lead::selectRaw('MONTH(created_at) as month_number, MONTHNAME(created_at) as month, COUNT(*) as count')
+            ->whereYear('created_at', $now->year)
+            ->groupBy('month_number', 'month')
+            ->orderBy('month_number')
+            ->get();
+
+        // Monthly lead summary (last 2 years, filling missing months)
+        $startDate = $now->copy()->subYears(2)->startOfMonth();
+        $endDate = $now->copy()->endOfMonth();
+
+        $leadsPerMonth = DB::table('leads')
+            ->select(
+                DB::raw("DATE_FORMAT(MIN(created_at), '%b %Y') as month"),
+                DB::raw("COUNT(*) as count")
+            )
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy(DB::raw("YEAR(created_at), MONTH(created_at)"))
+            ->orderBy(DB::raw("YEAR(created_at), MONTH(created_at)"))
+            ->get();
+
+        $monthlyLeadSummary = [];
+
+        $period = \Carbon\CarbonPeriod::create($startDate, '1 month', $endDate);
+        $leadsMap = $leadsPerMonth->keyBy('month');
+
+        foreach ($period as $date) {
+            $month = $date->format('M Y');
+            $monthlyLeadSummary[] = [
+                'month' => $month,
+                'count' => $leadsMap[$month]->count ?? 0,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'leads_created' => $leadsCreated,
+                'failed_login' => $failedLogins,
+                'leads_trend' => $leadsTrend,
+                'monthly_leads' => $monthlyLeads,
+                'monthly_lead_summary' => $monthlyLeadSummary,
+            ],
+        ]);
+    }
+    public function userStats($id)
+    {
+        $user = User::findOrFail($id);
+        // Get copied leads from user_activities or copied_by relation
+        $copiedLeads = $user->copiedLeads()->with('lead')->get();
+        $hiddenLeads = $user->hiddenLeads()->with('lead')->get();
+
+        // Optionally get from user_activities if you’re logging actions
+        $lastLogin = $user->activities()
+            ->where('activity_type', 'login')
+            ->latest()
+            ->first();
+
+        return response()->json([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+            'copied_leads_count' => $copiedLeads->count(),
+            'copied_leads' => $copiedLeads->map(function ($copy) {
+                return [
+                    'lead_id' => $copy->lead->id ?? null,
+                    'copied_at' => TimeHelper::karachiTime($copy->created_at),
+                ];
+            }),
+            'hidden_leads_count' => $hiddenLeads->count(),
+            'hidden_leads' => $hiddenLeads->map(function ($hide) {
+                return [
+                    'lead_id' => $hide->lead->id ?? null,
+                    'hidden_at' => TimeHelper::karachiTime($hide->created_at),
+                ];
+            }),
+            'last_login_at' => TimeHelper::karachiTime($lastLogin?->created_at),
+            'total_interactions' => $user->activities()->count(),
+            'last_interaction_at' => TimeHelper::karachiTime($user->activities()->latest()->first()?->created_at),
+        ]);
     }
 }

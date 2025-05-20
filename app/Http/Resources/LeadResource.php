@@ -70,9 +70,9 @@ class LeadResource extends JsonResource
         }
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'email' => $this->email,
-            'phone' => $this->phone,
+            // 'name' => $this->name,
+            // 'email' => $this->email,
+            // 'phone' => $this->phone,
             'lead_data' => [
                 'id' => $this->id,
                 'lead_from' => $leadFrom, // Campaign's domain fetched via campaign relationship

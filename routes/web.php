@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\V1\IpWhitelistController;
+use App\Http\Controllers\API\V1\StatsController;
 use App\Mail\TestMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -38,6 +39,6 @@ Route::get('/my-ip', function (Request $request) {
     return $ip; // Return IP in response
 });
 
-
+Route::get('/stats',  [StatsController::class, 'getStats']);
 
 Route::middleware('ip.whitelist')->get('/ips', [IpWhitelistController::class, 'index']);

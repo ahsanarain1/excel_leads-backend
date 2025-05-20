@@ -22,6 +22,7 @@ class IpWhitelistController extends Controller
 
     public function store(Request $request)
     {
+
         $request->validate([
             'ip_address' => 'required|ip|unique:ip_whitelist,ip_address',
         ]);
@@ -30,7 +31,7 @@ class IpWhitelistController extends Controller
             'ip_address' => $request->ip_address,
         ]);
 
-        return response()->json(['message' => 'IP added to whitelist', 'data' => $whitelist], 201);
+        return response()->json(['success' => true, 'message' => 'IP added to whitelist', 'data' => $whitelist], 201);
     }
 
     public function destroy($id)

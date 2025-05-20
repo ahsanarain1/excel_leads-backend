@@ -11,7 +11,7 @@ use App\Models\LeadDetail;
 use Illuminate\Database\Seeder;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Faker\Factory as Faker; // Add this to import Faker
-
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,17 +24,17 @@ class DatabaseSeeder extends Seeder
         $admin = User::factory()->create([
             'name' => 'Admin',
             'email' => 'admin@admin.com',
-            'password' => bcrypt('admin'),
+            'password' => Hash::make('admin'),
         ]);
         $manager = User::factory()->create([
             'name' => 'Manager',
             'email' => 'manager@manager.com',
-            'password' => bcrypt('manager'),
+            'password' => Hash::make('manager'),
         ]);
         $seller = User::factory()->create([
             'name' => 'Seller',
             'email' => 'seller@seller.com',
-            'password' => bcrypt('seller'),
+            'password' => Hash::make('seller'),
         ]);
 
         $this->call([
@@ -61,7 +61,7 @@ class DatabaseSeeder extends Seeder
 
 
         // Create leads
-        Lead::factory()->count(10)->create()->each(function ($lead) {
+        Lead::factory()->count(30)->create()->each(function ($lead) {
             // Create Faker instance
             $faker = Faker::create();
 

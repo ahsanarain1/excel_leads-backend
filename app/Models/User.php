@@ -80,4 +80,20 @@ class User extends Authenticatable
 
         return null;
     }
+    public function activities()
+    {
+        return $this->hasMany(UserActivity::class);
+    }
+
+    public function copiedLeads()
+    {
+        return $this->hasMany(UserActivity::class)
+            ->where('activity_type', 'lead_copy');
+    }
+
+    public function hiddenLeads()
+    {
+        return $this->hasMany(UserActivity::class)
+            ->where('activity_type', 'lead_delete');
+    }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\V1\CampaignController;
 use App\Http\Controllers\API\V1\IpWhitelistController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -7,6 +8,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\API\V1\LeadController;
 use App\Http\Controllers\API\V1\StatsController;
 use App\Http\Controllers\API\V1\UserController;
+use App\Models\Campaign;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,11 +46,16 @@ Route::group(
     function () {
         Route::post('/verify', [AuthController::class, 'store']);
         Route::post('/verify/resend', [AuthController::class, 'resend']);
+        Route::get('/campaigns', [CampaignController::class, 'index']);
+        Route::post('/campaigns', [CampaignController::class, 'store']);
         Route::get('/leads', [LeadController::class, 'index']);
         Route::get('/leads/{id}', [LeadController::class, 'show']);
         Route::patch('/leads/{id}/read', [LeadController::class, 'setLeadAsRead']);
         Route::delete('/leads/{id}', [LeadController::class, 'destroy']);
-        Route::get('/stats', [StatsController::class, 'getLeadsStats']);
+        Route::get('/stats', [StatsController::class, 'getDashboardStats']);
+        Route::get('/stats/user/{id}', [StatsController::class, 'userStats']);
+
+        // Route::get('/stats/monthly', [StatsController::class, 'monthlyLeadSummary']);
     }
 );
 

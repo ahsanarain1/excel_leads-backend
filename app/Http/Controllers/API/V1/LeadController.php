@@ -121,11 +121,12 @@ class LeadController extends Controller
             return response()->json([
                 'message' => 'Lead created successfully',
                 'lead' => $lead,
+                'success' => true,
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json(['error' => 'Failed to create lead', 'details' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Failed to create lead', 'details' => $e->getMessage(), 'success' => false,], 500);
         }
     }
 
